@@ -1,17 +1,15 @@
 package com.mainrun;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.Map.Entry;
-import java.util.Properties;
-import java.util.Set;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.commons.ConfigUtils;
+import com.commons.ConnectionFactory;
 import com.mysql.jdbc.Driver;
 
 public class MainRun
@@ -37,71 +35,105 @@ public class MainRun
 	public static void main(String[] args)
 	{
 		// TODO Auto-generated method stub
-		testGetDriver();
+		testGetDataFromDB();
+	}
+
+	public static void test(Statement stm) throws SQLException
+	{
+		// 发送sql语句
+		String sql = "SELECT 1";
+		boolean result = stm.execute(sql);
+		System.err.println("执行结果: " + result);
+	}
+
+	public static void insert(Statement stm) throws SQLException
+	{
+		String insertSql = "INSERT INTO STUDENT (NAME, CREATETIME) VALUES ('新增数据','2014-08-26')";
+		int icount = stm.executeUpdate(insertSql);
+		System.err.println("新增：" + icount + "条数据");
+	}
+
+	public static void update(Statement stm) throws SQLException
+	{
+		String updateSql = "UPDATE STUDENT SET NAME = '修改数据' WHERE ID = 11";
+		int ucount = stm.executeUpdate(updateSql);
+		System.err.println("修改：" + ucount + "条数据");
+	}
+
+	public static void selectAll(ResultSet rs, Statement stm) throws SQLException
+	{
+		String selectSql = "SELECT * FROM STUDENT";
+		rs = stm.executeQuery(selectSql);
+		while (rs.next())
+		{
+			String info = String.format("Id: %d, Name: %s", NumberUtils.toInt(String.valueOf(rs.getInt("ID")), 0),
+					String.valueOf(rs.getString("Name")));
+			System.err.println(info);
+		}
+	}
+
+	public static void selectByIdWithStatement(ResultSet rs, Statement stm, int id) throws SQLException
+	{
+		String selectSql = "SELECT * FROM STUDENT WHERE ID=" + id;
+		rs = stm.executeQuery(selectSql);
+		while (rs.next())
+		{
+			String info = String.format("Id: %d, Name: %s", NumberUtils.toInt(String.valueOf(rs.getInt("ID")), 0),
+					String.valueOf(rs.getString("Name")));
+			System.err.println(info);
+		}
+	}
+
+	public static void selectByIdWithPreStatement(Connection conn, ResultSet rs, int id) throws SQLException
+	{
+		String selectSql = "SELECT * FROM STUDENT WHERE ID = ?";
+		PreparedStatement pstm = conn.prepareStatement(selectSql);
+		pstm.setLong(1, id);
+		// pstm.setString(1, "daviddai");
+		rs = pstm.executeQuery();
+		// System.out.println(pstm.getQueryTimeout());
+		while (rs.next())
+		{
+			String info = String.format("Id: %d, Name: %s", NumberUtils.toInt(String.valueOf(rs.getInt("ID")), 0),
+					String.valueOf(rs.getString("Name")));
+			System.err.println(info);
+		}
 	}
 
 	/**
 	 * 测试获取数据库连接
 	 */
-	private static void testGetDriver()
+	public static void testGetDataFromDB()
 	{
 		Connection conn = null;
 		Statement stm = null;
 		ResultSet rs = null;
 		try
 		{
-			conn = DriverManager.getConnection(dbStr, dbUserName, dbPassword);
+			conn = ConnectionFactory.getConnection();
 			stm = conn.createStatement();
-			
+
 			// 加载驱动
 			Driver driver = new Driver();
 			// Connection conn = driver.connect(dbStr, prop);
 
 			System.err.println(conn);
 
-			// 发送sql语句
+			// test(stm);
+			// insert(stm);
+			// update(stm);
+			// selectAll(rs, stm);
 
-			String sql = "SELECT 1";
-			boolean result = stm.execute(sql);
-			System.err.println("执行结果: " + result);
+			// selectByIdWithPreStatement(conn, rs, 3);
+			selectByIdWithPreStatement(conn, rs, 3);
 
-			// String insertSql =
-			// "INSERT INTO STUDENT (NAME, CREATETIME) VALUES ('新增数据','2014-08-26')";
-			// int icount = stm.executeUpdate(insertSql);
-			// System.err.println("新增：" + icount + "条数据");
-
-			// String updateSql =
-			// "UPDATE STUDENT SET NAME = '修改数据' WHERE ID = 11";
-			// int ucount = stm.executeUpdate(updateSql);
-			// System.err.println("修改：" + ucount + "条数据");
-
-			String selectSql = "SELECT * FROM STUDENT";
-			rs = stm.executeQuery(selectSql);
-			while (rs.next())
-			{
-				String info = String.format("Id: %d, Name: %s", NumberUtils.toInt(String.valueOf(rs.getInt("ID")), 0),
-						String.valueOf(rs.getString("Name")));
-				System.err.println(info);
-			}
 		} catch (SQLException e)
 		{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} finally
 		{
-			try
-			{
-				if (rs != null)
-					rs.close();
-				if (stm != null)
-					stm.close();
-				if (conn != null)
-					conn.close();
-			} catch (Exception e2)
-			{
-				e2.printStackTrace();
-				// TODO: handle exception
-			}
+			ConnectionFactory.close(conn, stm, rs);
 		}
 	}
 }
