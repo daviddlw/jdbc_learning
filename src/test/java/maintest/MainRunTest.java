@@ -1,8 +1,10 @@
-package com.mainrun;
+package maintest;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import com.mainrun.MainRun;
 
 public class MainRunTest
 {

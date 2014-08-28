@@ -125,7 +125,7 @@ public class MainRun
 			// selectAll(rs, stm);
 
 			// selectByIdWithPreStatement(conn, rs, 3);
-			selectByIdWithPreStatement(conn, rs, 3);
+			 selectByIdWithPreStatement(conn, rs, 1);
 
 		} catch (SQLException e)
 		{
