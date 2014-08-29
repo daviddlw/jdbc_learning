@@ -1,4 +1,4 @@
-package maintest;
+package unittest;
 
 import org.junit.After;
 import org.junit.Before;
