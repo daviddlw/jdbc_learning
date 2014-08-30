@@ -5,11 +5,19 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.List;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.commons.ConfigUtils;
 import com.commons.ConnectionFactory;
+import com.dao.BookDaoImpl;
+import com.dao.IBookDao;
+import com.dao.IStudentDao;
+import com.dao.StudentDaoImpl;
+import com.dto.Book;
+import com.dto.Student;
+import com.enums.DaoEnum;
 import com.mysql.jdbc.Driver;
 
 public class MainRun
@@ -35,7 +43,64 @@ public class MainRun
 	public static void main(String[] args)
 	{
 		// TODO Auto-generated method stub
-		testGetDataFromDB();
+		// testGetDataFromDB();
+		testStudentOperations();
+	}
+
+	public static void testStudentOperations()
+	{
+		// IStudentDao stuDao = new StudentDaoImpl();
+		// stuDao.delete(5);
+		// System.err.println("删除成功...");
+
+		// List<Student> ls = stuDao.findAll();
+		// for (Student student : ls)
+		// {
+		// System.err.println(student);
+		// }
+
+		// System.err.println(stuDao.save(new Student(0, "MONGODB3")));
+		// System.err.println(stuDao.get(6));
+		// stuDao.update(new Student(6, "最新NOSQL技术"));
+		// System.err.println(stuDao.get(6));
+
+		// IBookDao bookDao = new BookDaoImpl();
+		// List<Book> books = bookDao.findAll();
+		// System.err.println(books);
+
+		testStudentCRUD(DaoEnum.List, 0);
+	}
+
+	public static void testStudentCRUD(DaoEnum type, int queryId)
+	{
+		IStudentDao dao = new StudentDaoImpl();
+		switch (type)
+		{
+		case Save:
+			int id = (Integer) dao.save(new Student(0, "新增学生" + System.currentTimeMillis()));
+			System.err.println("新增记录：" + dao.get(id));
+			break;
+		case Delete:
+			dao.delete(queryId);
+			break;
+		case Update:
+			dao.update(new Student(queryId, "更新学生" + System.currentTimeMillis()));
+			System.err.println("更新记录：" + dao.get(queryId));
+			break;
+		case Get:
+			System.err.println("获取记录" + dao.get(queryId));
+			break;
+		case List:
+			System.err.println("获取列表");
+			List<Student> ls = dao.findAll();
+			for (Student info : ls)
+			{
+				System.err.println(info);
+			}
+			break;
+		default:
+			break;
+		}
 	}
 
 	public static void test(Statement stm) throws SQLException
@@ -125,7 +190,7 @@ public class MainRun
 			// selectAll(rs, stm);
 
 			// selectByIdWithPreStatement(conn, rs, 3);
-			 selectByIdWithPreStatement(conn, rs, 1);
+			selectByIdWithPreStatement(conn, rs, 1);
 
 		} catch (SQLException e)
 		{
