@@ -10,7 +10,6 @@ import java.util.List;
 
 import com.commons.ConnectionFactory;
 import com.dto.Book;
-import com.sun.org.apache.xerces.internal.impl.xpath.XPath.Step;
 
 public class BookDaoImpl extends JdbcTemplate implements IBookDao
 {
