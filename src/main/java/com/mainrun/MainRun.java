@@ -5,7 +5,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -40,14 +43,14 @@ public class MainRun
 		dbPassword = configUtils.getProperty(DB_PASSWORD).isEmpty() ? dbPassword : configUtils.getProperty(DB_PASSWORD);
 	}
 
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
 		// TODO Auto-generated method stub
 		// testGetDataFromDB();
 		testStudentOperations();
 	}
 
-	public static void testStudentOperations()
+	public static void testStudentOperations() throws Exception
 	{
 		// IStudentDao stuDao = new StudentDaoImpl();
 		// stuDao.delete(5);
@@ -68,10 +71,47 @@ public class MainRun
 		// List<Book> books = bookDao.findAll();
 		// System.err.println(books);
 
-		testStudentCRUD(DaoEnum.List, 0);
+		// testStudentCRUD(DaoEnum.List, 14);
+
+		testBookCRUD(DaoEnum.Update, 11);
 	}
 
-	public static void testStudentCRUD(DaoEnum type, int queryId)
+	public static void testBookCRUD(DaoEnum type, int queryId)
+	{
+		IBookDao dao = new BookDaoImpl();
+		Random r = new Random();
+		switch (type)
+		{
+		case Save:
+			int id = (Integer) dao.save(new Book(0, "书籍" + System.currentTimeMillis(), "作者" + System.currentTimeMillis(), r
+					.nextInt(100), r.nextDouble() * 1000));
+			System.err.println("新增记录：" + dao.get(id));
+			break;
+		case Delete:
+			System.err.println("删除了" + dao.delete(queryId) + "条数据");
+			break;
+		case Update:
+			dao.update(new Book(queryId, "更新书籍" + System.currentTimeMillis(), "作者" + r.nextInt(100), r.nextInt(1000), r
+					.nextDouble() * 1000));
+			System.err.println("更新记录：" + dao.get(queryId));
+			break;
+		case Get:
+			System.err.println("获取记录" + dao.get(queryId));
+			break;
+		case List:
+			System.err.println("获取列表");
+			List<Book> ls = dao.findAll();
+			for (Book info : ls)
+			{
+				System.err.println(info);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
+	public static void testStudentCRUD(DaoEnum type, int queryId) throws Exception
 	{
 		IStudentDao dao = new StudentDaoImpl();
 		switch (type)
