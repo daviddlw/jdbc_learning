@@ -1,5 +1,6 @@
 package com.mainrun;
 
+import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -47,7 +48,34 @@ public class MainRun
 	{
 		// TODO Auto-generated method stub
 		// testGetDataFromDB();
-		testStudentOperations();
+		// testStudentOperations();
+		testReflect();
+	}
+
+	public static void testReflect()
+	{
+		Book book = new Book(1, "三国演义", "罗贯中", 100, 20);
+		Class<Book> type = Book.class;
+		for (Field field : type.getDeclaredFields())
+		{
+			if (!field.isAccessible())
+			{
+				field.setAccessible(true);
+			}
+
+			try
+			{
+				System.err.println("field name: " + field.getName() + "-" + field.get(book));
+			} catch (IllegalArgumentException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (IllegalAccessException e)
+			{
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public static void testStudentOperations() throws Exception

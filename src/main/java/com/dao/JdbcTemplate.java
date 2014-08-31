@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import com.commons.ConnectionFactory;
+import com.dto.DataAccessException;
 
 /**
  * JDBC通用模板
@@ -25,7 +26,7 @@ public abstract class JdbcTemplate
 	 */
 	protected interface ICallBack<T>
 	{
-		T doInCallBack(Connection conn, PreparedStatement pstm, ResultSet rs) throws SQLException;
+		T doInCallBack(Connection conn, PreparedStatement pstm, ResultSet rs) throws Throwable;
 	}
 
 	/**
@@ -35,7 +36,7 @@ public abstract class JdbcTemplate
 	 *            回调接口实体
 	 * @return 实体方法
 	 */
-	public <T> T template(ICallBack<T> callBack)
+	public <T> T template(ICallBack<T> callBack) throws DataAccessException
 	{
 		Connection conn = ConnectionFactory.getConnection();
 		PreparedStatement pstm = null;
@@ -45,9 +46,9 @@ public abstract class JdbcTemplate
 		try
 		{
 			result = callBack.doInCallBack(conn, pstm, rs);
-		} catch (Exception e)
+		} catch (Throwable e)
 		{
-			e.printStackTrace();
+			throw new DataAccessException(e);
 			// TODO: handle exception
 		} finally
 		{

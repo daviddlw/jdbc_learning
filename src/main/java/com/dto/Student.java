@@ -1,15 +1,8 @@
 package com.dto;
 
-import java.io.Serializable;
 
-public class Student implements Serializable
+public class Student
 {
-
-	/**
-	 * *
-	 */
-
-	private static final long serialVersionUID = 1L;
 	private int id;
 	private String name;
 
