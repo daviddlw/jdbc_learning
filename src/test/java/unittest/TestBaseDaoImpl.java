@@ -7,7 +7,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.dao.BaseDaoImpl;
+import com.dao.BaseDaoImplT;
 import com.dao.IBaseDao;
+import com.dao.IBaseDaoT;
 import com.dto.Book;
 import com.dto.Student;
 
@@ -56,8 +58,8 @@ public class TestBaseDaoImpl
 	@Test
 	public void testFindAll()
 	{
-		IBaseDao daoImpl = new BaseDaoImpl();
-		List<Student> datals = (List<Student>) daoImpl.findAll(Student.class);
+		IBaseDaoT<Student> daoImpl = new BaseDaoImplT<Student>(Student.class);
+		List<Student> datals = daoImpl.findAll();
 		for (Student data : datals)
 		{
 			System.err.println(data);

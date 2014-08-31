@@ -1,6 +1,7 @@
 package com.mainrun;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -15,7 +16,9 @@ import org.apache.commons.lang3.math.NumberUtils;
 
 import com.commons.ConfigUtils;
 import com.commons.ConnectionFactory;
+import com.dao.BaseDaoImplT;
 import com.dao.BookDaoImpl;
+import com.dao.IBaseDaoT;
 import com.dao.IBookDao;
 import com.dao.IStudentDao;
 import com.dao.StudentDaoImpl;
@@ -49,7 +52,7 @@ public class MainRun
 		// TODO Auto-generated method stub
 		// testGetDataFromDB();
 		// testStudentOperations();
-		testReflect();
+		// testReflect();
 	}
 
 	public static void testReflect()
