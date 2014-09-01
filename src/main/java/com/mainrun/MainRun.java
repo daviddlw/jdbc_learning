@@ -12,6 +12,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
+import javax.sql.DataSource;
+
+import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.commons.ConfigUtils;
@@ -35,14 +38,14 @@ public class MainRun
 	private static final String DB_USERNAME = "db.username";
 	private static ConfigUtils configUtils = new ConfigUtils("/dbconfig.properties");
 	private static String dbDriver = "org.gjt.mm.mysql.Driver";
-	private static String dbStr = "jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=UTF-8";
+	private static String dbUrl = "jdbc:mysql://localhost:3306/test?useUnicode=true&amp;characterEncoding=UTF-8";
 	private static String dbUserName = "root";
 	private static String dbPassword = "123456";
 
 	static
 	{
 		dbDriver = configUtils.getProperty(DB_DRIVER).isEmpty() ? dbDriver : configUtils.getProperty(DB_DRIVER);
-		dbStr = configUtils.getProperty(DB_URL).isEmpty() ? dbStr : configUtils.getProperty(DB_URL);
+		dbUrl = configUtils.getProperty(DB_URL).isEmpty() ? dbUrl : configUtils.getProperty(DB_URL);
 		dbUserName = configUtils.getProperty(DB_USERNAME).isEmpty() ? dbUserName : configUtils.getProperty(DB_USERNAME);
 		dbPassword = configUtils.getProperty(DB_PASSWORD).isEmpty() ? dbPassword : configUtils.getProperty(DB_PASSWORD);
 	}
@@ -53,6 +56,47 @@ public class MainRun
 		// testGetDataFromDB();
 		// testStudentOperations();
 		// testReflect();
+		 testDBCP();
+	}
+
+	public static void testDBCP() throws Exception
+	{
+		// 获得数据源对象
+		BasicDataSource ds = new BasicDataSource();
+
+		// 连接数据库
+		ds.setUrl(dbUrl);
+		ds.setDriverClassName(dbDriver);
+		ds.setUsername(dbUserName);
+		ds.setPassword(dbPassword);
+		ds.setMaxActive(4); //最大活动数
+		ds.setMaxIdle(2); //最大保存数
+		ds.setMaxWait(200);
+
+		Connection conn1 = ds.getConnection();
+		System.err.println("conn1 => " + conn1.toString());
+		Connection conn2 = ds.getConnection();
+		System.err.println("conn2 => " + conn2.toString());
+		Connection conn3 = ds.getConnection();
+		System.err.println("conn3 => " + conn3.toString());
+
+		conn1.close();
+		conn2.close();
+		conn3.close();
+
+		System.err.println("=============================");
+
+		Connection conn4 = ds.getConnection();
+		System.err.println("conn4 => " + conn4.toString());
+		Connection conn5 = ds.getConnection();
+		System.err.println("conn5 => " + conn5.toString());
+		Connection conn6 = ds.getConnection();
+		System.err.println("conn6 => " + conn6.toString());
+
+		conn4.close();
+		conn5.close();
+		conn6.close();
+
 	}
 
 	public static void testReflect()
@@ -114,16 +158,15 @@ public class MainRun
 		switch (type)
 		{
 		case Save:
-			int id = (Integer) dao.save(new Book(0, "书籍" + System.currentTimeMillis(), "作者" + System.currentTimeMillis(), r
-					.nextInt(100), r.nextDouble() * 1000));
+			int id = (Integer) dao.save(new Book(0, "书籍" + System.currentTimeMillis(), "作者" + System.currentTimeMillis(), r.nextInt(100), r
+					.nextDouble() * 1000));
 			System.err.println("新增记录：" + dao.get(id));
 			break;
 		case Delete:
 			System.err.println("删除了" + dao.delete(queryId) + "条数据");
 			break;
 		case Update:
-			dao.update(new Book(queryId, "更新书籍" + System.currentTimeMillis(), "作者" + r.nextInt(100), r.nextInt(1000), r
-					.nextDouble() * 1000));
+			dao.update(new Book(queryId, "更新书籍" + System.currentTimeMillis(), "作者" + r.nextInt(100), r.nextInt(1000), r.nextDouble() * 1000));
 			System.err.println("更新记录：" + dao.get(queryId));
 			break;
 		case Get:
@@ -247,6 +290,7 @@ public class MainRun
 		try
 		{
 			conn = ConnectionFactory.getConnection();
+			System.err.println("conn:" + conn);
 			stm = conn.createStatement();
 
 			// 加载驱动
@@ -262,6 +306,9 @@ public class MainRun
 
 			// selectByIdWithPreStatement(conn, rs, 3);
 			selectByIdWithPreStatement(conn, rs, 1);
+
+			Connection conn2 = ConnectionFactory.getConnection();
+			System.err.println("conn2: " + conn2);
 
 		} catch (SQLException e)
 		{
