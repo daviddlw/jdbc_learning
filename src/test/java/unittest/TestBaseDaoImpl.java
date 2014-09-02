@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.sql.Blob;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -14,6 +15,10 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Random;
+
+import javax.sql.rowset.CachedRowSet;
+import javax.sql.rowset.RowSetFactory;
+import javax.sql.rowset.RowSetProvider;
 
 import org.junit.After;
 import org.junit.Before;
@@ -28,6 +33,7 @@ import com.dto.Book;
 import com.dto.Student;
 import com.dto.Account;
 import com.dto.TestBlob;
+import com.sun.rowset.CachedRowSetImpl;
 
 public class TestBaseDaoImpl
 {
@@ -174,6 +180,8 @@ public class TestBaseDaoImpl
 		PreparedStatement pstm = conn.prepareStatement(sql);
 		ResultSet rs = pstm.executeQuery();
 		TestBlob tb = new TestBlob();
+		System.err.println(rs.getType());
+		System.err.println(rs.getConcurrency());
 		if (rs.next())
 		{
 			Blob pic = rs.getBlob("pic");
@@ -217,6 +225,68 @@ public class TestBaseDaoImpl
 			e.printStackTrace();
 			// TODO: handle exception
 		}
+	}
 
+	@Test
+	public void testBatchOperation()
+	{
+		Connection conn = ConnectionFactory.getConnection();
+		try
+		{
+			String sql = "SELECT ID, NAME FROM BOOK";
+			PreparedStatement pstm = conn.prepareStatement(sql, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
+			ResultSet rs = pstm.executeQuery();
+			while (rs.next())
+			{
+				int id = rs.getInt("id");
+				String name = rs.getString("name");
+				if (id == 2)
+				{
+					System.err.println("找到要指定记录");
+					rs.updateString("name", "三国演义");
+					rs.updateRow();
+				}
+			}
+		} catch (Exception e)
+		{
+			e.printStackTrace();
+			// TODO: handle exception
+		}
+	}
+
+	@Test
+	public void testDataBaseMetaData() throws SQLException
+	{
+		Connection conn = ConnectionFactory.getConnection();
+		DatabaseMetaData dbmd = conn.getMetaData();
+		System.err.println("getDatabaseMajorVersion=>" + dbmd.getDatabaseMajorVersion());
+		System.err.println("getDatabaseProductName=>" + dbmd.getDatabaseProductName());
+		System.err.println("getDatabaseProductVersion=>" + dbmd.getDatabaseProductVersion());
+		System.err.println("getURL=>" + dbmd.getURL());
+		System.err.println("getUserName=>" + dbmd.getUserName());
+	}
+
+	@Test
+	public void testOffLineOperation() throws Exception
+	{
+		Connection conn = ConnectionFactory.getConnection();
+		String sql = "SELECT ID, NAME FROM BOOK";
+		Statement stmt = conn.createStatement();
+		ResultSet rs = stmt.executeQuery(sql);
+
+		RowSetFactory factory = RowSetProvider.newFactory();
+		CachedRowSet crs = new CachedRowSetImpl();
+		crs.populate(rs);
+
+		rs.close();
+		stmt.close();
+		conn.close();
+		
+		crs.afterLast();
+		while (crs.previous())
+		{
+			String information = String.format("%d_%s", crs.getInt("id"), crs.getString("name"));
+			System.err.println(information);
+		}
 	}
 }
