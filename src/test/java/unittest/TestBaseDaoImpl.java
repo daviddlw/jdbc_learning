@@ -276,28 +276,30 @@ public class TestBaseDaoImpl
 
 		RowSetFactory factory = RowSetProvider.newFactory();
 		//相当于c#里面的DataSet
-		CachedRowSet crs = new CachedRowSetImpl();
-		crs.populate(rs);
+		CachedRowSet crs = new CachedRowSetImpl();		
+//		crs.populate(rs);
+		crs.setPageSize(3);
+		crs.populate(rs, 4);
 
 		rs.close();
 		stmt.close();
 		conn.close();
 
-		crs.afterLast();
-		while (crs.previous())
+//		crs.afterLast();
+		while (crs.next())
 		{
 			String information = String.format("%d_%s_%s", crs.getInt("id"), crs.getString("name"), crs.getString("author"));
 			System.err.println(information);
-			int updateId = crs.getInt("id");
-			if (updateId == 3)
-			{
-				crs.updateString("author", "施耐庵");
-				crs.updateRow();
-				//因为已经是离线操作了，如果需要操作ResultSet必须重新应用到一个新的链接
-				Connection newConn = ConnectionFactory.getConnection();
-				newConn.setAutoCommit(false);
-				crs.acceptChanges(newConn);
-			}
+			// int updateId = crs.getInt("id");
+			// if (updateId == 3)
+			// {
+			// crs.updateString("author", "施耐庵");
+			// crs.updateRow();
+			// //因为已经是离线操作了，如果需要操作ResultSet必须重新应用到一个新的链接
+			// Connection newConn = ConnectionFactory.getConnection();
+			// newConn.setAutoCommit(false);
+			// crs.acceptChanges(newConn);
+			// }
 		}
 	}
 }
