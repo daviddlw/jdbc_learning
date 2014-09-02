@@ -1,12 +1,15 @@
 package com.mainrun;
 
+import java.beans.PropertyVetoException;
 import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
 import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -26,8 +29,13 @@ import com.dao.IBookDao;
 import com.dao.IStudentDao;
 import com.dao.StudentDaoImpl;
 import com.dto.Book;
+import com.dto.HelloWorldImpl;
+import com.dto.IHelloWorld;
+import com.dto.LogHandler;
 import com.dto.Student;
 import com.enums.DaoEnum;
+import com.mchange.v2.c3p0.ComboPooledDataSource;
+import com.mchange.v2.c3p0.DataSources;
 import com.mysql.jdbc.Driver;
 
 public class MainRun
@@ -56,7 +64,69 @@ public class MainRun
 		// testGetDataFromDB();
 		// testStudentOperations();
 		// testReflect();
-		 testDBCP();
+		// testDBCP();
+		// testDynamicProxy();
+		testC3p0();
+	}
+
+	public static void testC3p0() throws Exception
+	{
+		ComboPooledDataSource cpds = new ComboPooledDataSource();
+		cpds.setDriverClass(dbDriver);
+		cpds.setJdbcUrl(dbUrl);
+		cpds.setUser(dbUserName);
+		cpds.setPassword(dbPassword);
+		cpds.setMaxPoolSize(10);
+
+		// Connection conn1 = cpds.getConnection();
+		// System.err.println("conn1=> "+conn1);
+		// Connection conn2 = cpds.getConnection();
+		// System.err.println("conn2=> "+conn2);
+		// Connection conn3 = cpds.getConnection();
+		// System.err.println("conn3=> "+conn3);
+		// conn1.close();
+		// conn2.close();
+		// conn3.close();
+		int count = 10;
+		List<Connection> connLs = new ArrayList<Connection>();
+		for (int i = 0; i < count; i++)
+		{
+			Connection conn = cpds.getConnection();
+			connLs.add(conn);
+			System.err.println("Conn " + i + "=> " + conn);
+		}
+
+		for (Connection conn : connLs)
+		{
+			conn.close();
+		}
+		
+		System.err.println("==============");
+		
+		Connection conn4 = cpds.getConnection();
+		System.err.println("conn4=> " + conn4);
+		Connection conn5 = cpds.getConnection();
+		System.err.println("conn6=> " + conn5);
+		Connection conn6 = cpds.getConnection();
+		System.err.println("conn6=> " + conn6);
+		conn4.close();
+		conn5.close();
+		conn6.close();
+
+		System.err.println(cpds.getNumConnections(dbUserName, dbPassword));
+
+		System.err.println(cpds.getAutomaticTestTable());
+		cpds.setPreferredTestQuery("SELECT 1");
+		System.out.println(cpds.getPreferredTestQuery());
+
+	}
+
+	public static void testDynamicProxy()
+	{
+		HelloWorldImpl hwi = new HelloWorldImpl();
+		LogHandler lh = new LogHandler(hwi);
+		IHelloWorld ihw = (IHelloWorld) Proxy.newProxyInstance(hwi.getClass().getClassLoader(), hwi.getClass().getInterfaces(), lh);
+		ihw.sayHello("你好");
 	}
 
 	public static void testDBCP() throws Exception
@@ -69,8 +139,8 @@ public class MainRun
 		ds.setDriverClassName(dbDriver);
 		ds.setUsername(dbUserName);
 		ds.setPassword(dbPassword);
-		ds.setMaxActive(4); //最大活动数
-		ds.setMaxIdle(2); //最大保存数
+		ds.setMaxActive(4); // 最大活动数
+		ds.setMaxIdle(2); // 最大保存数
 		ds.setMaxWait(200);
 
 		Connection conn1 = ds.getConnection();
