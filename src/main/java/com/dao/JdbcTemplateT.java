@@ -7,6 +7,7 @@ import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -229,7 +230,7 @@ public class JdbcTemplateT<T>
 		final String sql = sb.toString();
 
 		return template(new ICallBack<List<T>>() {
-			
+
 			public List<T> doInCallBack(Connection conn, PreparedStatement pstm, ResultSet rs) throws Throwable
 			{
 				System.out.println("SQL: " + sql);
@@ -256,7 +257,7 @@ public class JdbcTemplateT<T>
 			}
 		});
 	}
-	
+
 	/**
 	 * 执行JDBC操作的通用接口
 	 * 
@@ -281,6 +282,7 @@ public class JdbcTemplateT<T>
 	public <T> T template(ICallBack<T> callBack) throws DataAccessException
 	{
 		Connection conn = ConnectionFactory.getConnection();
+		showAutoCommit(conn);
 		PreparedStatement pstm = null;
 		ResultSet rs = null;
 
@@ -297,5 +299,16 @@ public class JdbcTemplateT<T>
 			ConnectionFactory.close(conn, pstm, rs);
 		}
 		return result;
+	}
+
+	private void showAutoCommit(Connection conn)
+	{
+		try
+		{
+			System.err.println("autoCommit=>" + conn.getAutoCommit());
+		} catch (SQLException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }
