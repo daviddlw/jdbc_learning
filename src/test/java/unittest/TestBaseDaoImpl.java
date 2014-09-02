@@ -11,9 +11,11 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Savepoint;
+import java.sql.Statement;
 import java.util.List;
 import java.util.Random;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -30,10 +32,20 @@ import com.dto.TestBlob;
 public class TestBaseDaoImpl
 {
 	private Random r = new Random();
+	private long start = 0;
+	private long end = 0;
 
 	@Before
 	public void setUp() throws Exception
 	{
+		start = System.currentTimeMillis();
+	}
+
+	@After
+	public void setDown()
+	{
+		end = System.currentTimeMillis();
+		System.err.println("耗时：" + (end - start));
 	}
 
 	@Test
@@ -165,16 +177,46 @@ public class TestBaseDaoImpl
 		if (rs.next())
 		{
 			Blob pic = rs.getBlob("pic");
-			byte[] picBytes = pic.getBytes(1, (int)pic.length());
-			
+			byte[] picBytes = pic.getBytes(1, (int) pic.length());
+
 			Blob txt = rs.getBlob("txt");
-			byte[] txtBytes = txt.getBytes(1, (int)txt.length());
-			
+			byte[] txtBytes = txt.getBytes(1, (int) txt.length());
+
 			tb.setId(rs.getInt("id"));
 			tb.setPicBytes(picBytes);
 			tb.setTxtBytes(txtBytes);
 		}
-		
+
 		System.err.println(tb);
+	}
+
+	/*
+	 * (不使用批量)耗时：7941 (使用批量)耗时：7602
+	 */
+	@Test
+	public void testExecuteBatch() throws Exception
+	{
+		Connection conn = ConnectionFactory.getConnection();
+		try
+		{
+			String sql = "INSERT INTO tb_batch (NAME) VALUES (?)";
+			PreparedStatement pstm = conn.prepareStatement(sql);
+			conn.setAutoCommit(false);
+			int count = 50000;
+			for (int i = 0; i < count; i++)
+			{
+				pstm.setString(1, "name" + i);
+				// pstm.executeUpdate();
+				pstm.addBatch();
+			}
+			pstm.executeBatch();
+			conn.commit();
+		} catch (Exception e)
+		{
+			conn.rollback();
+			e.printStackTrace();
+			// TODO: handle exception
+		}
+
 	}
 }
