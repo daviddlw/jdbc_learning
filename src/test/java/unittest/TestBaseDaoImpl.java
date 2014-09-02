@@ -265,13 +265,13 @@ public class TestBaseDaoImpl
 		System.err.println("getURL=>" + dbmd.getURL());
 		System.err.println("getUserName=>" + dbmd.getUserName());
 	}
-	
+
 	@Test
 	public void testOffLineOperation() throws Exception
 	{
 		Connection conn = ConnectionFactory.getConnection();
-		String sql = "SELECT ID, NAME FROM BOOK";
-		Statement stmt = conn.createStatement();
+		String sql = "SELECT ID, NAME, AUTHOR FROM BOOK";
+		Statement stmt = conn.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_UPDATABLE);
 		ResultSet rs = stmt.executeQuery(sql);
 
 		RowSetFactory factory = RowSetProvider.newFactory();
@@ -281,12 +281,23 @@ public class TestBaseDaoImpl
 		rs.close();
 		stmt.close();
 		conn.close();
-		
+
 		crs.afterLast();
 		while (crs.previous())
 		{
-			String information = String.format("%d_%s", crs.getInt("id"), crs.getString("name"));
+			String information = String.format("%d_%s_%s", crs.getInt("id"), crs.getString("name"), crs.getString("author"));
 			System.err.println(information);
+			int updateId = crs.getInt("id");
+			if (updateId == 3)
+			{
+				Connection newConn = ConnectionFactory.getConnection();
+				newConn.setAutoCommit(false);
+				crs.acceptChanges(newConn);
+				crs.updateString("author", "施耐庵");
+				crs.updateRow();
+				crs.commit();
+				newConn.commit();
+			}
 		}
 	}
 }
