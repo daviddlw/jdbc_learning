@@ -30,7 +30,7 @@ public class TestImg extends JFrame
 		try
 		{
 			Connection conn = ConnectionFactory.getConnection();
-			String sql = "SELECT ID, PIC, TXT FROM TB_LOB WHERE ID=1";
+			String sql = "SELECT ID, PIC, TXT FROM TB_LOB WHERE ID=2";
 			PreparedStatement pstm = conn.prepareStatement(sql);
 			ResultSet rs = pstm.executeQuery();
 			TestBlob tb = new TestBlob();

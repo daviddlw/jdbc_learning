@@ -140,7 +140,7 @@ public class TestBaseDaoImpl
 			{
 				// 发生异常扣款失败
 				e.printStackTrace();
-				conn.rollback(point1);
+				conn.rollback(point2);
 				conn.commit();
 
 				System.err.println("异常报错执行回滚...");
@@ -275,6 +275,7 @@ public class TestBaseDaoImpl
 		ResultSet rs = stmt.executeQuery(sql);
 
 		RowSetFactory factory = RowSetProvider.newFactory();
+		//相当于c#里面的DataSet
 		CachedRowSet crs = new CachedRowSetImpl();
 		crs.populate(rs);
 
@@ -290,13 +291,12 @@ public class TestBaseDaoImpl
 			int updateId = crs.getInt("id");
 			if (updateId == 3)
 			{
+				crs.updateString("author", "施耐庵");
+				crs.updateRow();
+				//因为已经是离线操作了，如果需要操作ResultSet必须重新应用到一个新的链接
 				Connection newConn = ConnectionFactory.getConnection();
 				newConn.setAutoCommit(false);
 				crs.acceptChanges(newConn);
-				crs.updateString("author", "施耐庵");
-				crs.updateRow();
-				crs.commit();
-				newConn.commit();
 			}
 		}
 	}

@@ -1,30 +1,22 @@
 package com.mainrun;
 
-import java.beans.PropertyVetoException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Proxy;
-import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
-
-import javax.sql.DataSource;
 
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.lang3.math.NumberUtils;
 
 import com.commons.ConfigUtils;
 import com.commons.ConnectionFactory;
-import com.dao.BaseDaoImplT;
 import com.dao.BookDaoImpl;
-import com.dao.IBaseDaoT;
 import com.dao.IBookDao;
 import com.dao.IStudentDao;
 import com.dao.StudentDaoImpl;
@@ -35,7 +27,6 @@ import com.dto.LogHandler;
 import com.dto.Student;
 import com.enums.DaoEnum;
 import com.mchange.v2.c3p0.ComboPooledDataSource;
-import com.mchange.v2.c3p0.DataSources;
 import com.mysql.jdbc.Driver;
 
 public class MainRun
