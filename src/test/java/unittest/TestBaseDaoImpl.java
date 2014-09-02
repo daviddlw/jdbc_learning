@@ -265,7 +265,7 @@ public class TestBaseDaoImpl
 		System.err.println("getURL=>" + dbmd.getURL());
 		System.err.println("getUserName=>" + dbmd.getUserName());
 	}
-
+	
 	@Test
 	public void testOffLineOperation() throws Exception
 	{
